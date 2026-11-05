@@ -1,0 +1,58 @@
+name: Build HyperLite
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'hyperlite.zip'
+      - '.github/workflows/build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Android Module
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager "ndk;27.2.12479018" "cmake;3.31.0"
+          
+      - name: Extract Source
+        run: |
+          unzip -o hyperlite.zip -d extracted
+
+          if [ ! -f extracted/hyperlite/build.sh ]; then
+            echo "ERROR: build.sh not found!"
+            exit 1
+          fi
+
+      - name: Build HyperLite
+        working-directory: extracted/hyperlite
+        env:
+          ANDROID_NDK_LATEST_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: |
+          chmod +x build.sh
+          bash build.sh
+
+      - name: Verify Build
+        run: |
+          test -f extracted/hyperlite/out/HyperLite.zip
+          unzip -l extracted/hyperlite/out/HyperLite.zip
+
+      - name: Upload HyperLite
+        uses: actions/upload-artifact@v4
+        with:
+          name: HyperLite
+          path: extracted/hyperlite/out/HyperLite.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
