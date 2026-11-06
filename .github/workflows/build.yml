@@ -1,38 +1,57 @@
-name: Build HyperLite
+name: Build Hooks
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+  push:
+    paths:
+      - 'highend_home.zip'
+      - 'framework_hook.zip'
+      - 'systemui_hook.zip'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build Zygisk module
-
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [highend_home, framework_hook, systemui_hook]
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Extract source zip
-        run: unzip -oq hyperlite.zip -d .
-
-      - name: Setup Android NDK
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r27c
-          link-to-sdk: true
-
-      - name: Build module
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - name: Extract source
+        id: ex
         run: |
-          chmod +x hyperlite/build.sh
-          bash hyperlite/build.sh
+          if [ -f "${{ matrix.name }}.zip" ]; then
+            rm -rf src_build && mkdir src_build
+            unzip -q "${{ matrix.name }}.zip" -d src_build
+            rm -rf src_build/.github
+            echo "ok=1" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Upload flashable module
-        uses: actions/upload-artifact@v4
+      - uses: actions/setup-java@v4
+        if: steps.ex.outputs.ok == '1'
         with:
-          name: HyperLite
-          path: hyperlite/out/HyperLite.zip
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.ex.outputs.ok == '1'
+        with:
+          gradle-version: '8.7'
+
+      - name: Build
+        if: steps.ex.outputs.ok == '1'
+        working-directory: src_build
+        run: gradle --no-daemon assembleRelease
+
+      - name: Rename APK
+        if: steps.ex.outputs.ok == '1'
+        run: |
+          mkdir -p out
+          cp src_build/app/build/outputs/apk/release/*.apk out/${{ matrix.name }}.apk
+
+      - uses: actions/upload-artifact@v4
+        if: steps.ex.outputs.ok == '1'
+        with:
+          name: ${{ matrix.name }}
+          path: out/${{ matrix.name }}.apk
