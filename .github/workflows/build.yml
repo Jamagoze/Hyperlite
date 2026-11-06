@@ -7,6 +7,8 @@ on:
       - 'highend_home.zip'
       - 'framework_hook.zip'
       - 'systemui_hook.zip'
+      - 'settings_hook.zip'
+      - 'plugin_hook.zip'
 
 jobs:
   build:
@@ -14,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [highend_home, framework_hook, systemui_hook]
+        name: [highend_home, framework_hook, systemui_hook, settings_hook, plugin_hook]
     steps:
       - uses: actions/checkout@v4
 
