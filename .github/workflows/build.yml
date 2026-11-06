@@ -17,6 +17,13 @@ jobs:
       fail-fast: false
       matrix:
         name: [highend_home, framework_hook, systemui_hook, settings_hook, plugin_hook]
+    env:
+      # Optional: classic PAT stored as repo secret HYPERCEILER_PACKAGES_TOKEN
+      # (Settings > Secrets and variables > Actions). Only needed for GitHub Packages dependencies.
+      GPR_USER: ${{ github.actor }}
+      GPR_TOKEN: ${{ secrets.HYPERCEILER_PACKAGES_TOKEN }}
+      ORG_GRADLE_PROJECT_gpr.user: ${{ github.actor }}
+      ORG_GRADLE_PROJECT_gpr.key: ${{ secrets.HYPERCEILER_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
