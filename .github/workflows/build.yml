@@ -9,6 +9,8 @@ on:
       - 'systemui_hook.zip'
       - 'settings_hook.zip'
       - 'plugin_hook.zip'
+      - 'screenshot_hook.zip'
+      - 'screenrecorder_hook.zip'
 
 jobs:
   build:
@@ -16,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [highend_home, framework_hook, systemui_hook, settings_hook, plugin_hook]
+        name: [highend_home, framework_hook, systemui_hook, settings_hook, plugin_hook, screenshot_hook, screenrecorder_hook]
     env:
       # Optional: classic PAT stored as repo secret HYPERCEILER_PACKAGES_TOKEN
       # (Settings > Secrets and variables > Actions). Only needed for GitHub Packages dependencies.
