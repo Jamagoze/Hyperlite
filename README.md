@@ -1,4 +1,3 @@
-screenshot Aosp problem and others...
 # Config hooks (LSPosed)
 
 Five small LSPosed modules ported from a personal HyperCeiler setup, for a Redmi Pad SE on HyperOS 1.0 (Android 14).
